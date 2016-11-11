@@ -15,7 +15,7 @@ curses.noecho()
 stdscr.keypad(1)
 curses.curs_set(False)
 
-level = 0
+level = 4
 level_change = 0
 quest_accepted = 0
 
@@ -55,7 +55,8 @@ curses.init_pair(101, curses.COLOR_RED, -1)
 board = [['🔰'] * 50 for x in range(51)]
 # inv = {'key': 0, 'gold coin': 42, 'dagger': 1, 'arrow': 12, 'diamond of wisdom': 1
 inv = {'key': 0, 'diamond of wisdom':0, 'iron ore': 0, 'bag of gold':0}
-items = {'diamond of wisdom': (20, 5), 'key': (100, 1), 'iron ore': (20, 5), 'magic sword of wisdom': (20, 5), 'bag of gold': (200, 5)}
+items = {'diamond of wisdom': (20, 5, "artifact"), 'key': (100, 1, "artifact"), 'iron ore': (20, 5, "raw material"),
+        'magic sword of wisdom': (20, 5), 'bag of gold': (200, 5)}
 
 for i in range(2, 49):
     for y in range(2, 48):
@@ -363,13 +364,13 @@ def print_message(message, multiple=False, continue_info=False):
 def guess_number(tries):
 
     def show_boss():
-        boss = ['                                |                              ',
+        boss = ['\033[91m                               |                              ',
                  '                               ||                              ',
                 '       -==-____        _--_   ___||___   _--_        ____-==-   ',
                 '          ---__----___/ __ \--  || |  --/ __ \___----__---      ',
                 '               ---__ / /  \ \   \\ /   / /  \ \ __---           ',
                 '                    -\|    \ \  _\/_  / /    |/-                ',
-                '                   __/ \_()/\ \//  \\/ /\()_/ \__               ',
+                '                   __/ \_\033[94m()\033[91m/\ \//  \\/ /\ \033[94m()\033[91m_/ \__               ',
                 '                  /_ \ / ~~  `-'    '-  ~~ \ / _\              ',
                 '                 |/_\ |(~/   /\  /\  /\   \~)| /_\|             ',
                 '                  /_  | /   (O ` \/   O)   \ |  _\              ',
@@ -380,12 +381,12 @@ def guess_number(tries):
                 '                     \ | /\^\  \/  /^/\ | /                     ',
                 '                         |( /\_\^__^/_/\ )|                     ',
                 '                         | \\__--__--__// |                     ',
-                '                        /~~~~~~~~~~~~~~~~~~\                    ',
+                '\033[92m                        /~~~~~~~~~~~~~~~~~~\                    ',
                 '                       |/|  /\  /\/\  /\  |\|                   ',
                 '                       ||| | | ( () ) | | |||                   ',
                 '                       |\|  \/  \/\/  \/  |/|                   ',
                 '                        \__________________/                    ',
-                '                        | (____------____) |                    ',
+                '                        | (____------____) |                    \x1b[0m',
                                                                                   ]
         os.system('clear')
         for e in boss:
