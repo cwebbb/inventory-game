@@ -15,7 +15,7 @@ curses.noecho()
 stdscr.keypad(1)
 curses.curs_set(False)
 
-level = 4
+level = 0
 level_change = 0
 quest_accepted = 0
 
