@@ -106,7 +106,8 @@ def help():
             "| | | || |___| |____| |    _",
             "\_| |_/\____/\_____/\_|   (_)"]
 
-    menu_text = ['\n', "the game is about walking and collecting stuff", "It is really cool", "believe me "]
+    menu_text = ['\n', "the game is about walking and collecting stuff", "It is really cool", "believe me", "You walk with w,a,s,d keys",
+    "Guy with turban has nice quest for you", "Interact with him by pressing space"," Collect key and go to the red gate to go to the next level"]
 
     for i in range(len(logo)):
         stdscr.addstr(i, int(dims[1] * 1/2 - 1/2 * len(max(logo, key=len))), logo[i], curses.color_pair(1))
