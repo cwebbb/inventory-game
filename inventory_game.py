@@ -17,7 +17,7 @@ curses.curs_set(False)
 
 level = 0
 level_change = 0
-
+quest_accepted = 0
 
 # TU MAMY PARY KOLORÓW POTRZEBNYCH DO KOLOROWANIE curses.init_pair (a, b, c) gdzie a - numer pary, b - kolor znaku, c - kolor tła
 # NUMERY KOLORÓW Z PLIKU KTÓRY WYŚLĘ! PRZYKŁAD UŻYCIA - PATRZ LINIJKA 153
@@ -54,8 +54,8 @@ curses.init_pair(101, curses.COLOR_RED, -1)
 
 board = [['🔰'] * 50 for x in range(51)]
 # inv = {'key': 0, 'gold coin': 42, 'dagger': 1, 'arrow': 12, 'diamond of wisdom': 1
-inv = {'key': 0, 'diamond of wisdom':0, 'iron ore': 0}
-items = {'diamond of wisdom': (20, 5), 'key': (100, 1), 'iron ore': (20, 5)}
+inv = {'key': 0, 'diamond of wisdom':0, 'iron ore': 0, 'bag of gold':0}
+items = {'diamond of wisdom': (20, 5), 'key': (100, 1), 'iron ore': (20, 5), 'magic sword of wisdom': (20, 5), 'bag of gold': (200, 5)}
 
 for i in range(2, 49):
     for y in range(2, 48):
@@ -64,11 +64,10 @@ for i in range(2, 49):
 board_copy = copy.deepcopy(board)
 
 loot = 0
-item1 = 0
 
-reachable_symbols = [' ', '💎','📛', '🏡', '🗝', '⛩', '🕍', '🐲']
+reachable_symbols = [' ', '💎','📛', '🏡', '🗝', '⛩', '🕍', '🐲', '👳', '💰', '🗡']
 
-# 👹
+
 def menu():
 
     logo = [("                                  /   \       "),
@@ -150,28 +149,6 @@ def print_inventory(inventory, items):
     message_board = ["|MESSAGE-BOARD---------------------------------------------------|"] + ["|                                                                |"] * 5+ ["|----------------------------------------------------------------|"]
 
 
-
-
-
-
-    # logo = ["""@@@@@@@@@@@@@@@@@@@@@**^^""~~~"^@@^*@*@@**@@@@@@@@@""",
-    #         """@@@@@@@@@@@@@*^^'"~   , - ' '; ,@@b. '  -e@@@@@@@@@""",
-    #         """@@@@@@@@*^"~      . '     . ' ,@@@@(  e@*@@@@@@@@@@""",
-    #         """@@@@@^~         .       .   ' @@@@@@, ~^@@@@@@@@@@@""",
-    #         """@@@~ ,e**@@*e,  ,e**e, .    ' '@@@@@@e,  "*@@@@@'^@""",
-    #         """@',e@@@@@@@@@@ e@@@@@@       ' '*@@@@@@    @@@'   0""",
-    #         """@@@@@@@@@@@@@@@@@@@@@',e,     ;  ~^*^'    ;^~   ' 0""",
-    #         """@@@@@@@@@@@@@@@^""^@@e@@@   .'           ,'   .'  @""",
-    #         """@@@@@@@@@@@@@@'    '@@@@@ '         ,  ,e'  .    ;@""",
-    #         """@@@@@@@@@@@@@' ,&&,  ^@*'     ,  .  i^"@e, ,e@e  @@""",
-    #         """@@@@@@@@@@@@' ,@@@@,          ;  ,& !,,@@@e@@@@ e@@""",
-    #         """@@@@@,~*@@*' ,@@@@@@e,   ',   e^~^@,   ~'@@@@@@,@@@""",
-    #         """@@@@@@, ~" ,e@@@@@@@@@*e*@*  ,@e  @@""@e,,@@@@@@@@@""",
-    #         """@@@@@@@@ee@@@@@@@@@@@@@@@" ,e@' ,e@' e@@@@@@@@@@@@@""",
-    #         """@@@@@@@@@@@@@@@@@@@@@@@@" ,@" ,e@@e,,@@@@@@@@@@@@@@""",
-    #         """@@@@@@@@@@@@@@@@@@@@@@@~ ,@@@,,0@@@@@@@@@@@@@@@@@@@""",
-    #         """@@@@@@@@@@@@@@@@@@@@@@@@,,@@@@@@@@@@@@@@@@@@@@@@@@@"""]
-
     for i in range(len(logo)):
         stdscr.addstr(1 + i, 3, logo[i], curses.color_pair(3))
 
@@ -191,15 +168,19 @@ def print_inventory(inventory, items):
         total_quantity = sum(inv.values())
         total_weight = 0
         total_value = 0
-        messages = ["Total number of items:  .", "Total value of items:   vodka bottles.", "Total weight of items:{} horse shites."]
+        messages = ["Total number of items: {}", "Total value of items: {} vodka bottles.", "Total weight of items: {} horse shites.",
+                    "Blacksmith's quest:", "{}/12 diamonds of wisdom, {}/12 iron ores, {}/3 bags of gold "]
         for e in inv:
             total_value += items[e][0] * inv[e]
             total_weight += items[e][1] * inv[e]
 
-        stdscr.addstr(printLine + 1, int(len(inventory_body[0])/2) - len(messages[0])//2, "Total number of items: {}.".format(total_quantity), curses.color_pair(3))
-        stdscr.addstr(printLine + 2, int(len(inventory_body[0])/2) - len(messages[1])//2, "Total value of items: {} vodka bottles.".format(total_value), curses.color_pair(3))
-        stdscr.addstr(printLine + 3, int(len(inventory_body[0])/2) - len(messages[2])//2, "Total weight of items: {} horse shites.".format(total_weight), curses.color_pair(3))
+        stdscr.addstr(printLine + 1, int(len(inventory_body[0])/2) - len(messages[0])//2, messages[0].format(total_quantity), curses.color_pair(3))
+        stdscr.addstr(printLine + 2, int(len(inventory_body[0])/2) - len(messages[1])//2, messages[1].format(total_value), curses.color_pair(3))
+        stdscr.addstr(printLine + 3, int(len(inventory_body[0])/2) - len(messages[2])//2, messages[2].format(total_weight), curses.color_pair(3))
 
+        if quest_accepted == 1:
+            stdscr.addstr(printLine + 14, int(len(inventory_body[0])/2) - 30, messages[3], curses.color_pair(3))
+            stdscr.addstr(printLine + 15, int(len(inventory_body[0])/2) - 30, messages[4].format(inv['diamond of wisdom'], inv['iron ore'], inv['bag of gold']), curses.color_pair(3))
     for i in range(len(message_board)):
         stdscr.addstr(i + int(len(inventory_body[0])/2) + 3, 5, message_board[i], curses.color_pair(3))
 
@@ -362,11 +343,22 @@ def print_map(stdscr):
     # stdscr.addstr(30, 30, str(curses.can_change_color()))
     # stdscr.addstr(31, 30, str(hero_x_pos))
     # stdscr.addstr(32, 30, str(loot))
-def print_message(message):
+def print_message(message, multiple=False, continue_info=False):
+    if multiple is True:
+        stdscr.clear()
+        print_map(stdscr)
+        print_inventory(inv, items)
+
+    if continue_info == True:
+        space = "press space to continue"
+        stdscr.addstr(43, 45, space, curses.color_pair(3))
+
     message_to_print = message
     stdscr.addstr(41, 35 - int(len(message)/2), message_to_print, curses.color_pair(3))
     stdscr.refresh()
+
     key = stdscr.getch()
+    return key
 
 def guess_number(tries):
 
@@ -416,12 +408,14 @@ def guess_number(tries):
     show_boss()
     print('\n\nWelcome human! You did well so far. It\'s a shame it\'s all for naught!!!')
     print("I have thought up a 3 digit number. Each digit is unique.\nYou have %s guesses to get it or YOU WILL DIE!!!" % tries )
-    print(number)
+
+    if 'magic sword of wisdom' in inv:
+        print(""" \n Magic sword of wisdom whispers: "He's thinking about {}!!!" """.format(number))
     while True:
         answer = []
         guess = input('Enter your guess: ')
         if guess == number:
-            print('YOU GOT LUCKY THIS TIME BASTARD!!!\n')
+            print("HOW IS THIS POSSIBLE? I CAN'T HANDLE IT!!! *drops dead* \n")
             break
         elif len(guess) == 3 and guess.isdigit() == True and guess[0] != '0' and guess[0] != guess[1] != guess[2]:
             tries -= 1
@@ -453,10 +447,16 @@ board = spawn_objects(1, '🗝')
 board = spawn_objects(1, '⛩')
 board = spawn_objects(4, '💎')
 board = spawn_objects(4, '📛')
+board = spawn_objects(1, '💰')
+
+# board = spawn_objects(1, '👳')
+board[45][25] = '👳'
+board[46][25] = ' '
 board_copy = copy.deepcopy(board)
 board[47][25] = "🚶"
 board_copy[47][25] = '🏡'
 key = ''
+skip_getch = False
 
 while level < 4:
     dims = stdscr.getmaxyx()
@@ -506,7 +506,11 @@ while level < 4:
         stdscr.clear()
         print_map(stdscr)
         print_inventory(inv, items)
-        key = stdscr.getch()
+
+
+        if skip_getch is False:
+            key = stdscr.getch()
+        skip_getch = False
     # stdscr.addch(20, 20, key)
 
         if key == ord('w'):
@@ -533,7 +537,7 @@ while level < 4:
                 board[hero_y_pos][hero_x_pos] = "🚶"
                 board[hero_y_pos][hero_x_pos - 1] = board_copy[hero_y_pos][hero_x_pos - 1]
 
-        if board[hero_y_pos][hero_x_pos] == "🚶" and board_copy[hero_y_pos][hero_x_pos] == "💎":
+        if board_copy[hero_y_pos][hero_x_pos] == "💎":
             board_copy[hero_y_pos][hero_x_pos] = " "
 
             if 'diamond of wisdom' not in inv:
@@ -542,7 +546,7 @@ while level < 4:
                 inv['diamond of wisdom'] += 1
             stdscr.clear()
 
-        if board[hero_y_pos][hero_x_pos] == "🚶" and board_copy[hero_y_pos][hero_x_pos] == "📛":
+        if board_copy[hero_y_pos][hero_x_pos] == "📛":
             board_copy[hero_y_pos][hero_x_pos] = " "
 
             if 'iron ore' not in inv:
@@ -551,15 +555,26 @@ while level < 4:
                 inv['iron ore'] += 1
             stdscr.clear()
 
-        if board[hero_y_pos][hero_x_pos] == "🚶" and board_copy[hero_y_pos][hero_x_pos] == "🗝":
+        if board_copy[hero_y_pos][hero_x_pos] == "🗝":
             board_copy[hero_y_pos][hero_x_pos] = " "
             if 'key' not in inv:
                 inv['key'] = 1
             else:
                 inv['key'] += 1
-            stdscr.clear()
+            # stdscr.clear()
+        if board_copy[hero_y_pos][hero_x_pos] == "🗡":
+            board_copy[hero_y_pos][hero_x_pos] = " "
+            inv['magic sword of wisdom'] = 1
+            inv['diamond of wisdom'] = 0
+            inv['iron ore'] = 0
+            inv['bag of gold'] = 0
+            quest_accepted = 0
 
-        if board[hero_y_pos][hero_x_pos] == "🚶" and board_copy[hero_y_pos][hero_x_pos] == "⛩":
+        if board_copy[hero_y_pos][hero_x_pos] == "💰":
+            board_copy[hero_y_pos][hero_x_pos] = " "
+            inv['bag of gold'] += 1
+
+        if board_copy[hero_y_pos][hero_x_pos] == "⛩":
             if inv['key'] == 1:
                 print_message("CONGRATS! YOU ARE GOING TO THE NEXT LEVEL")
                 level += 1
@@ -567,13 +582,95 @@ while level < 4:
             else:
                 print_message("I can't cross, I have to find key first!")
 
-        if board[hero_y_pos][hero_x_pos] == "🚶" and board_copy[hero_y_pos][hero_x_pos] == '🐲':
+        if  board_copy[hero_y_pos][hero_x_pos] == '🐲':
             if inv['key'] == 1:
                 print_message("DRAGON:LETS FIGHT!")
                 level += 1
                 level_change = 0
             else:
                 print_message("DRAGON:YOU CAN'T CHALLANGE ME WITHOUT THE KEY")
+
+
+        if (
+            board_copy[hero_y_pos-1][hero_x_pos] == "👳" or board_copy[hero_y_pos+1][hero_x_pos] == "👳" or
+            board_copy[hero_y_pos][hero_x_pos +1] == "👳" or board_copy[hero_y_pos][hero_x_pos-1] == "👳"
+            ):
+            key = print_message("press space to interact with npc", multiple=True)
+            skip_getch = True
+            if key == ord(' ') and level == 1:
+                monologue = ['BLACKSMITH: Hello!',
+                            'BLACKSMITH: My mindreading abilites are telling me',
+                            'BLACKSMITH: That you want to kill the dragon',
+                            'BLACKSMITH: I can help you with that.',
+                            'BLACKSMITH: I can forge the ultimate weapon.',
+                            'BLACKSMITH: I need following ingredients:',
+                            'BLACKSMITH: 12 diamonds of wisdom, 12 steel ores',
+                            'BLACKSMITH: and 3 bags of gold - my fee',
+                            'BLACKSMITH: With my mistical sword',
+                            "BLACKSMITH: You'll be able to kill the dragon,",
+                            'BLACKSMITH: With just one hit!',
+                            "BLACKSMITH: I'll be wainting for you",
+                            "BLACKSMITH: somewhere near the dragon lair.",
+                            "BLACKSMITH: See ya!"]
+
+                monologue_number = 0
+
+                while key == ord(' '):
+                    stdscr.refresh()
+                    key = print_message(monologue[monologue_number], multiple=True, continue_info=True)
+                    if monologue_number < len(monologue) - 1:
+                        monologue_number += 1
+                    else:
+                        # print_message(monologue[-1], multiple=True)
+                        for i in range(len(board_copy)):
+                            for p in range(len(board_copy[i])):
+                                if board_copy[i][p] == "👳":
+                                    board_copy[i][p] = ' '
+                                    board[i][p] = ' '
+
+                        stdscr.refresh()
+                        stdscr.clear()
+                        print_map(stdscr)
+                        print_inventory(inv, items)
+                        quest_accepted = 1
+                        break
+
+            if inv['diamond of wisdom'] == 12 and inv['iron ore'] == 12 and inv['bag of gold'] == 3:
+                monologue = ['BLACKSMITH: NICE! You managed to get',
+                            'BLACKSMITH: all of the ingredients for sword',
+                            'BLACKSMITH: I will forge it in no time!',
+                            '<Few hours later>',
+                            'BLACKSMITH: Here you go, your magic sword',
+                            'BLACKSMITH: Have fun killing the dragon!',
+                            'BLACKSMITH: Ciao Ciao!']
+
+                monologue_number = 0
+
+                while key == ord(' '):
+                    stdscr.refresh()
+                    key = print_message(monologue[monologue_number], multiple=True, continue_info=True)
+                    if monologue_number < len(monologue) - 1:
+                        monologue_number += 1
+                    else:
+                        # print_message(monologue[-1], multiple=True)
+                        for i in range(len(board_copy)):
+                            for p in range(len(board_copy[i])):
+                                if board_copy[i][p] == "👳":
+                                    board_copy[i][p] = '🗡'
+                                    board[i][p] = '🗡'
+
+                        stdscr.refresh()
+                        stdscr.clear()
+                        print_map(stdscr)
+                        print_inventory(inv, items)
+                        quest_accepted = 1
+                        break
+                # inv['magic sword of wisdom'] = 1
+            elif key == ord(' ') and level == 3:
+                key = print_message("Sorry but you don't have enough ingredients for sword!")
+                skip_getch = True
+
+            stdscr.clear()
 
     if level >= 2 and level_change == 0:
         stdscr.clear()
@@ -584,10 +681,14 @@ while level < 4:
 
         if level == 3:
             board = spawn_objects(1, '🐲')
+            board = spawn_objects(1, '👳')
+
         else:
             board = spawn_objects(1, '⛩')
 
+        board = spawn_objects(1, '💰')
         board = spawn_objects(4, '💎')
+        board = spawn_objects(4, '📛')
         board_copy = copy.deepcopy(board)
         board[47][25] = "🚶"
         board_copy[47][25] = '🕍'
